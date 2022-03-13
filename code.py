@@ -58,189 +58,7 @@ def get_class_name():
     class_index_dict = datasets.ImageFolder("/data/imagenet_2012/val").classes
     return class_index_dict
 
-
 class_name = get_class_name()
-
-
-# def keras_dataGenerator(source_path, target_path, img_num):
-#     '''
-#     # 函数作用是将source_path文件夹中的图片进行随机干扰变换，然后将其输出到目标文件夹。
-#     :param source_path: 源文件夹，存放用于干扰的图片
-#     :param target_path: 目标文件夹，存放源文件夹中图片干扰之后的图片
-#     :param img_num: 需要生成的干扰图片的数目
-#     :return: 无
-#     '''
-#
-#     fill_mode = ["reflect", "wrap", "nearest"]
-#     datagen = image.ImageDataGenerator(
-#         zca_whitening=True,
-#         rotation_range=30,
-#         width_shift_range=0.03,
-#         height_shift_range=0.03,
-#         shear_range=0.5,
-#         zoom_range=0.1,
-#         channel_shift_range=100,
-#         horizontal_flip=True,
-#         fill_mode=fill_mode[np.random.randint(3)]
-#     )
-#     gen_data = datagen.flow_from_directory(source_path,
-#                                            batch_size=1,
-#                                            shuffle=False,
-#                                            save_to_dir=target_path,
-#                                            save_prefix="gen",
-#                                            target_size=(224, 224))
-#     while (img_num > 0):
-#         gen_data.next()
-#         img_num -= 1
-
-
-## 生成固定干扰的图片，为了便于两个图片协同变换。方法弃用
-def generate_coin(sigma):  # crop, fliplr, sigma, connor, flipud, x_s, y_s, x_t, y_t, rotate, shear, order, mode):
-
-    seq = iaa.Sequential({  # 建立一个名为seq的实例，定义增强方法，用于增强
-        # iaa.Crop(px=(crop, crop+1)),  # 对图像进行crop操作，随机在距离边缘的0到16像素中选择crop范围
-        # # iaa.Fliplr(0.5),  # 对百分之五十的图像进行做左右翻转
-        # iaa.GaussianBlur((0, 1.0)),  # 在模型上使用0均值1方差进行高斯模糊
-        #
-        # iaa.Fliplr(fliplr),
-        iaa.GaussianBlur(sigma=sigma)
-        # iaa.contrast.LinearContrast(connor, per_channel=True),
-        # iaa.Flipud(flipud),
-        #
-        # iaa.Affine(
-        #     scale={"x": x_s, "y": y_s},
-        #     translate_percent={"x": x_t, "y": y_t},
-        #     rotate=rotate,
-        #     shear=shear,
-        #     order=order,
-        #     mode=mode
-        # )
-    })
-    return seq
-
-
-## 生成固定干扰的图片，为了便于两个图片协同变换。
-def generate_coinT(aug_num, thread_num, img_list_dir="/home/python/Image/exper_v1/marker_C/",
-                   save_dir="/home/python/Image/exper_v1/marker_C/"):
-    # aug_num = args[0]
-    # thread_num = args[1]
-
-    print("线程序号：", thread_num)
-    try:
-        imglist = np.load(img_list_dir + "/result/data_imglist_" + str(thread_num) + ".npy",
-                          allow_pickle=True)
-        print(np.shape(imglist))  # (1, ..,.,.)
-        img_num = 1
-
-        # sleepawhile(3)
-
-        imglist = [imglist]
-        # crop_ind = 0
-        # fliplr_ind = 0
-        # sigma_ind = 1
-        # connor_ind = 0
-        # flipud_ind = 0
-        # x_s_ind = 0
-        # rotate_ind = 0
-        # shear_ind = 0
-        # order_ind = 0
-        # mode_ind = 0
-
-        for i in range(aug_num):
-            #     crop =  random.randint(0, 20)
-            # crop = (0.01 * np.abs(np.sin(i / 3.14))) if crop_ind else 0
-            # crop = int(20 * (i/aug_num)) if crop_ind else 0
-            # fliplr = (i % 2) if fliplr_ind else 0
-            # # sigma = 5 * np.abs(np.cos(i / 3.14)) if sigma_ind else 0
-            # sigma = 5 * (i/aug_num) # if sigma_ind else 0
-            #
-            # # (0.75-1.5)
-            # # connor = np.sin(i / 3.14) * 0.75 + 0.75 if connor_ind else 1
-            # connor = (i/aug_num) * 0.75 + 0.75 if connor_ind else 1
-            #
-            # flipud = i % 2 if flipud_ind else 0
-            #
-            # if x_s_ind:
-            #     # x_s = np.sin(i / 3.14) * 0.4 + 0.8
-            #     # y_s = np.sin(i / 3.14) * 0.4 + 0.8
-            #     # x_t = np.sin(i / 3.14) * 0.4 - 0.2
-            #     # y_t = np.sin(i / 3.14) * 0.4 - 0.2
-            #     x_s = (i/aug_num) * 0.4 + 0.8
-            #     y_s = (i/aug_num) * 0.4 + 0.8
-            #     x_t = (i/aug_num) * 0.4 - 0.2
-            #     y_t = (i/aug_num) * 0.4 - 0.2
-            # else:
-            #     x_s = 1
-            #     y_s = 1
-            #     x_t = 0
-            #     y_t = 0
-            #
-            # # rotate = int(90 * np.sin(i / 3.14) - 45) if rotate_ind else 0
-            # rotate = int(90 * (2*i/aug_num-1)) if rotate_ind else 0
-            # # shear = int(32 * np.sin(i / 3.14) - 16) if shear_ind else 0
-            # shear = int(32 * (2*i/aug_num-1) - 16) if shear_ind else 0
-            # order = (i % 2) if order_ind else 0
-            #
-            # c = ["edge", "symmetric", "reflect", "wrap"]
-            # mode = c[i % 4] if mode_ind else "constant"
-            # mode = "constant"
-
-            # if i % 50 == 0:
-            #     print(i)
-
-            # seq = generate_coin(sigma) #crop, fliplr, sigma, connor, flipud, x_s, y_s, x_t, y_t, rotate, shear, order, mode)
-
-            # 变换的种类，可以在此选择，然后找出有意义的干扰。
-            # seq = iaa.Sequential({  # 建立一个名为seq的实例，定义增强方法，用于增强
-            #     # iaa.Crop(px=(crop, crop+1)),  # 对图像进行crop操作，随机在距离边缘的0到16像素中选择crop范围
-            #     # # iaa.Fliplr(0.5),  # 对百分之五十的图像进行做左右翻转
-            #     # iaa.GaussianBlur((0, 1.0)),  # 在模型上使用0均值1方差进行高斯模糊
-            #     #
-            #     # iaa.Fliplr(fliplr),
-            #     iaa.GaussianBlur(sigma=sigma)
-            #     # iaa.contrast.LinearContrast(connor, per_channel=True),
-            #     # iaa.Flipud(flipud),
-            #     #
-            #     # iaa.Affine(
-            #     #     scale={"x": x_s, "y": y_s},
-            #     #     translate_percent={"x": x_t, "y": y_t},
-            #     #     rotate=rotate,
-            #     #     shear=shear,
-            #     #     order=order,
-            #     #     mode=mode
-            #     # )
-            # })
-
-            # 作为marker_C的时候是需要进行调制的,但是marker_B不需要
-            seq = iaa.GaussianBlur(sigma=(6 + 6 * np.sin(7 * i * np.pi / 180)))
-
-            # marker_B
-            # seq = iaa.GaussianBlur((0, 1.0))
-            images_aug = seq.augment_images(imglist)
-            #  这里得出的结果应该是50*图片尺寸，我们只需要直接进行保存就好了，不用全部进行存储
-            for img in range(img_num):
-                # cv2.imwrite("/home/python/Image/mid_result/aug/" + str(thread_num) + "/" + str(img) + "/val/class/" + str(i) +".jpg", images_aug[img])
-                # print(np.shape(images_aug[img]))
-                cv2.imwrite(
-                    save_dir + str(thread_num) + "/val/class/" + str(i) + ".jpg",
-                    images_aug[img])
-
-            # for j in range(img_num):
-            #     aug_list[j].append(images_aug[j])
-
-            if i % 333 == 0:
-                print("线程", thread_num, "进度：", (i / aug_num))
-
-
-    except Exception as e:
-        print(e)
-    # print("线程", thread_num, "开始存储")
-    # for j in range(img_num):  # （0-49）
-    #     for k in range(aug_num):
-    #         cv2.imwrite("/home/python/Image/mid_result/aug/" + str(thread_num) + '/' + str(j) + '/val/class/' + str(k) + '.jpg', aug_list[j][k])
-    #
-
-
 # 计算各种评估方式的方法
 ## 首先是预处理方法，为了删除左右异常值
 def pre_handle(point):
@@ -1224,14 +1042,6 @@ def make_train_dir(train_dir, class_num, image_num):
 
 # 构建训练数据集
 def make_dir(train_dir, filename, class_num, image_num, save_dir):
-    """
-    直接构建class_num类的数据，平均每个类选取image_num个图片
-    :param save_dir:
-    :param train_dir: 训练文件夹
-    :param class_num: 文件数量
-    :param image_num: 图片数量
-    :return:
-    """
     # sample_dir = sample(os.listdir(train_dir), class_num)
     # global file
     data = []
@@ -1334,7 +1144,6 @@ def js_criterion():
     others = others_list
     # 得出结果为onelist shape: (50, 1000, 64, 64, 3)
     # otherslist shape : (9, 50, 64, 64, 3)
-    # 首先将其数据输出为图片，然后制作dataloader
     # 首先需要设置目录
     if not Path(data_dir):
         os.makedirs(path=data_dir)
@@ -1483,7 +1292,6 @@ def cal_mid(data_dir="/home/python/Image/mid_result/", aug_num=1000):
     # # # 设计文件目录
     # shutil.rmtree(data_dir+"/aug/")
     #
-    # # 将对应分类的图片输出到对应文件夹, 当文件存在时，下面代码可以不需要
     # # for i in range(class_num):
     # #     os.makedirs(data_dir + str(i) + "/val/class/")
     # # for i in range(class_num):
@@ -2186,7 +1994,7 @@ def multi_get_acc(thread_num, filename, js_std):
     for i in range(shape[0]):
         for j in range(shape[1]):
             for k in range(shape[2]):
-                # 这里是删除方差大的节点，可以理解就是对于同类图片来说，我们需要保留能提取稳定特征的节点，但是也可以试试删除方差小的节点
+                # 这里是删除方差大的节点，可以理解就是对于同类来说，我们需要保留能提取稳定特征的节点，但是也可以试试删除方差小的节点
                 if js_std[i][j][k] > js_tresh:
                     # if js_std[i][j][k] < js_tresh:
                     node[i, j, k] = 0
